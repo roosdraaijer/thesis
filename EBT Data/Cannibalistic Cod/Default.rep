@@ -1,0 +1,73 @@
+*******************************************************************************
+
+  PROGRAM, RUN AND ARGUMENTS
+    Program   : /Users/apple/Desktop/MSc Thesis 1/MSc Thesis/Coding/EBT/EBT_tutorial/CP_fisheries/Programme/Cod-Sprat
+    Run       : /Users/apple/Desktop/MSc Thesis 1/MSc Thesis/Coding/EBT/EBT_tutorial/CP_fisheries/Programme/Default
+    Arguments : 
+
+  USED VALUES FOR CONTROL VARIABLES
+    Time integration method                                            :  RKCK
+    Fixed step size or integration accuracy when adaptive              :  1E-09     
+    Cohort cycle time interval                                         :  1         
+    Tolerance value, determining identity with zero                    :  1E-05     
+    Maximum integration time/Parameter change period in bifurcation    :  36500.00  
+    Output time interval                                               :  1.00      
+    Complete state output interval, 0 for none                         :  1.00      
+
+  USED VALUES OF TOLERANCES
+    Minimum allowable number of individuals in cohort                  :  0      
+    Relative tolerances for i-state variable #0                        :  0      
+    Absolute tolerances for i-state variable #0                        :  0      
+
+  USED VALUES OF PARAMETERS
+    [ 0] Fishing mortality rate imposed on adult cod                   :  15        
+    [ 1] Relative vulnerability of juvenile cod to fishing mortality   :  0.05      
+    [ 2] Starting time (in years) of cod harvesting                    :  20        
+    [ 3] Time (in years) cod harvesting stops (0 for constant harvesting throughout  :  60        
+    [ 4] Invasion rate of juvenile cod                                 :  0         
+    [ 5] Invasion rate of small-adult cod                              :  0         
+    [ 6] Invasion rate of large-adult cod                              :  0         
+    [ 7] Fishing mortality rate imposed on adult sprat                 :  0         
+    [ 8] Relative vulnerability of juvenile sprat to fishing mortality  :  0.5       
+    [ 9] Starting time (in years) of sprat harvesting                  :  0         
+    [10] Time (in years) sprat harvesting stops (0 for constant harvesting througho  :  30        
+    [11] Maximum density of the sprat resource                         :  120       
+    [12] Maximum density of the juvenile cod resource                  :  0.75      
+    [13] Maximum density of the adult cod resource                     :  1         
+    [14] Turn-over rates of resources                                  :  0.1       
+    [15] Maximum ingestion rate juvenile sprat                         :  0.23      
+    [16] Maximum ingestion rate small-adult sprat                      :  0.078     
+    [17] Maximum ingestion rate large-adult sprat                      :  0.078     
+    [18] Maintenance rate juvenile sprat                               :  0.032     
+    [19] Maintenance rate small-adult sprat                            :  0.02      
+    [20] Maintenance rate large-adult sprat                            :  0.02      
+    [21] Conversion efficiency sprat and juvenile cod                  :  0.3       
+    [22] Ratio of sprat newborn-maturation body mass                   :  0.05      
+    [23] Ratio of small-large adult sprat body mass                    :  0.7       
+    [24] Investment in growth small-adult sprat                        :  0.8       
+    [25] Background mortality rate juvenile sprat                      :  0.001     
+    [26] Background mortality rate adult sprat                         :  0.001     
+    [27] Maximum ingestion rate juvenile cod                           :  0.08      
+    [28] Maximum ingestion rate small-adult cod                        :  0.022     
+    [29] Maximum ingestion rate large-adult cod                        :  0.022     
+    [30] Fraction planctivory juvenile cod                             :  0.8       
+    [31] Fraction planctivory small-adult cod                          :  0.5       
+    [32] Fraction planctivory large-adult cod                          :  0.2       
+    [33] Preference of small-adult cod for juvenile sprat              :  0.25      
+    [34] Preference of small-adult cod for small-adult sprat           :  0.1       
+    [35] Preference of small-adult cod for large-adult sprat           :  0.1       
+    [36] Preference of small-adult cod for juvenile cod                :  0.05      
+    [37] Preference of large-adult cod for juvenile sprat              :  0.16      
+    [38] Preference of large-adult cod for small-adult sprat           :  0.24      
+    [39] Preference of large-adult cod for large-adult sprat           :  0.24      
+    [40] Preference of large-adult cod for juvenile cod                :  0.16      
+    [41] Maintenance rate juvenile cod                                 :  0.015     
+    [42] Maintenance rate small-adult cod                              :  0.006     
+    [43] Maintenance rate large-adult cod                              :  0.006     
+    [44] Conversion efficiency adult cod                               :  0.4       
+    [45] Ratio of cod newborn-maturation body mass                     :  0.003     
+    [46] Ratio of small-large adult cod body mass                      :  0.125     
+    [47] Investment in growth small-adult cod                          :  0.8       
+    [48] Background mortality rate juvenile cod                        :  0.001     
+    [49] Background mortality rate adult cod                           :  0.001     
+*******************************************************************************
