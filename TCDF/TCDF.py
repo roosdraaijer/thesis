@@ -10,6 +10,7 @@ import heapq
 import copy
 import os
 import sys
+from livelossplot import PlotLossesKeras
 
 def preparedata(file, target):
     """Reads data from csv file and transforms it to two PyTorch tensors: dataset x and target time series y that has to be predicted."""
@@ -74,8 +75,10 @@ def findcauses(target, cuda, epochs, kernel_size, layers,
     
     scores, firstloss = train(1, X_train, Y_train, model, optimizer,log_interval,epochs)
     firstloss = firstloss.cpu().data.item()
+
     for ep in range(2, epochs+1):
         scores, realloss = train(ep, X_train, Y_train, model, optimizer,log_interval,epochs)
+                                               #Save reallosses
     realloss = realloss.cpu().data.item()
     
     s = sorted(scores.view(-1).cpu().detach().numpy(), reverse=True)
@@ -161,7 +164,7 @@ def findcauses(target, cuda, epochs, kernel_size, layers,
             causeswithdelay[(targetidx, v)]=totaldelay+1
     print("Validated causes: ", validated)
     
-    return validated, causeswithdelay, realloss, scores.view(-1).cpu().detach().numpy().tolist()
+    return validated, causeswithdelay, realloss, scores.view(-1).cpu().detach().numpy().tolist(), values_realloss
 
 
 

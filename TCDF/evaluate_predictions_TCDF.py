@@ -77,32 +77,32 @@ def evaluate_prediction(target, cuda, epochs, kernel_size, layers,
     
     for ep in range(1, epochs+1):
         scores, realloss = TCDF.train(ep, X_train, Y_train, model, optimizer,loginterval,epochs)
-    realloss = realloss.cpu().data.item()
-
-    model.eval()
-    output = model(X_test)
-    prediction=output.cpu().detach().numpy()[0,:,0]
-    T = output.size()[1]
-    total_e = 0.
-    for t in range(T):
-        real = Y_test[:,t,:]
-        predicted = output[:,t,:]
-        e = abs(real - predicted)
-        total_e+=e
-    total_e = total_e.cpu().data.item()
-    total = 0.
-    for t in range(1,T):
-        temp = abs(Y_test[:,t,:] - Y_test[:,t-1,:])
-        total+=temp
-    denom = (T/float(T-1))*total
-    denom = denom.cpu().data.item()
-
-    if denom!=0.:
-        MASE = total_e/float(denom)
-    else:
-        MASE = 0.
+        model.eval()
+        output = model(X_test)
+        prediction=output.cpu().detach().numpy()[0,:,0]
+        T = output.size()[1]
+        total_e = 0.
+        for t in range(T):
+            real = Y_test[:,t,:]
+            predicted = output[:,t,:]
+            e = abs(real - predicted)
+            total_e+=e
+        total_e = total_e.cpu().data.item()
+        total = 0.
+        for t in range(1,T):
+            temp = abs(Y_test[:,t,:] - Y_test[:,t-1,:])
+            total+=temp
+        denom = (T/float(T-1))*total
+        denom = denom.cpu().data.item()
     
-    return MASE, prediction
+        if denom!=0.:
+            MASE = total_e/float(denom)
+        else:
+            MASE = 0.
+        
+        return MASE, prediction
+        
+    realloss = realloss.cpu().data.item()
 
 def plot_predictions(predictions, file):
     """Plots the predicted values of all time series in the dataset"""
