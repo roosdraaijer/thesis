@@ -194,11 +194,12 @@ def runTCDF(datafile):
     alldelays = dict()
     allreallosses=dict()
     allscores=dict()
+    alllosses=dict()
 
     columns = list(df_data)
     for c in columns:
         idx = df_data.columns.get_loc(c)
-        causes, causeswithdelay, realloss, scores = TCDF.findcauses(c, cuda=cuda, epochs=nrepochs, 
+        causes, causeswithdelay, realloss, scores, losses = TCDF.findcauses(c, cuda=cuda, epochs=nrepochs, 
         kernel_size=kernel_size, layers=levels, log_interval=loginterval, 
         lr=learningrate, optimizername=optimizername,
         seed=seed, dilation_c=dilation_c, significance=significance, file=datafile)
@@ -207,8 +208,9 @@ def runTCDF(datafile):
         allcauses[idx]=causes
         alldelays.update(causeswithdelay)
         allreallosses[idx]=realloss
-
-    return allcauses, alldelays, allreallosses, allscores, columns
+        alllosses[idx]=losses
+        
+    return allcauses, alldelays, allreallosses, allscores, columns, alllosses
 
 def plotgraph(stringdatafile,alldelays,columns):
     """Plots a temporal causal graph showing all discovered causal relationships annotated with the time delay between cause and effect."""
@@ -248,8 +250,9 @@ def main(datafiles, evaluation):
         
         print("\n Dataset: ", stringdatafile)
 
+        global alllosses
         # run TCDF
-        allcauses, alldelays, allreallosses, allscores, columns = runTCDF(datafile) #results of TCDF containing indices of causes and effects
+        allcauses, alldelays, allreallosses, allscores, columns, alllosses = runTCDF(datafile) #results of TCDF containing indices of causes and effects
         
         print("\n===================Results for", stringdatafile,"==================================")
         for pair in alldelays:
