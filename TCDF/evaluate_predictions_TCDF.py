@@ -77,6 +77,7 @@ def evaluate_prediction(target, cuda, epochs, kernel_size, layers,
     
     for ep in range(1, epochs+1):
         scores, realloss = TCDF.train(ep, X_train, Y_train, model, optimizer,loginterval,epochs)
+        
         model.eval()
         output = model(X_test)
         prediction=output.cpu().detach().numpy()[0,:,0]
@@ -103,6 +104,7 @@ def evaluate_prediction(target, cuda, epochs, kernel_size, layers,
         return MASE, prediction
         
     realloss = realloss.cpu().data.item()
+
 
 def plot_predictions(predictions, file):
     """Plots the predicted values of all time series in the dataset"""

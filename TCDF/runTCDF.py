@@ -105,6 +105,7 @@ def evaluate(gtfile, validatedcauses, columns):
     TPsdirect = []
     TPs = []
     FNs = []
+
     for key in readgt:
         for v in validatedcauses[key]:
             if v not in extendedreadgt[key]:
