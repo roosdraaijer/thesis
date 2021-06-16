@@ -11,6 +11,8 @@ import copy
 import os
 import sys
 from matplotlib import pyplot as plt
+from utils import EarlyStopping, LRScheduler
+
 
 def preparedata(file, target):
     """Reads data from csv file and transforms it to two PyTorch tensors: dataset x and target time series y that has to be predicted."""
@@ -29,14 +31,14 @@ def preparedata(file, target):
     return x, y
 
 
-def train(epoch, traindata, traintarget, modelname, optimizer,scheduler,log_interval,epochs):
+def train(epoch, traindata, traintarget, modelname, optimizer,log_interval,
+          epochs, lr_scheduler, early_stopping):
     """Trains model by performing one epoch and returns attention scores and loss."""
 
     modelname.train()
     x, y = traindata[0:1], traintarget[0:1]
         
     optimizer.zero_grad()
-    scheduler
     epochpercentage = (epoch/float(epochs))*100
     output = modelname(x)
 
@@ -45,6 +47,15 @@ def train(epoch, traindata, traintarget, modelname, optimizer,scheduler,log_inte
     loss = F.mse_loss(output, y)
     loss.backward()
     optimizer.step()
+    
+    # either initialize early stopping or learning rate scheduler
+    if lr_scheduler:
+        print('INFO: Initializing learning rate scheduler')
+        lr_scheduler = LRScheduler(optimizer)
+
+    if early_stopping:
+        print('INFO: Initializing early stopping')
+        early_stopping = EarlyStopping()
 
     if epoch % log_interval ==0 or epoch % epochs == 0 or epoch==1:
         print('Epoch: {:2d} [{:.0f}%] \tLoss: {:.6f}'.format(epoch, epochpercentage, loss))
@@ -52,7 +63,8 @@ def train(epoch, traindata, traintarget, modelname, optimizer,scheduler,log_inte
     return attentionscores.data, loss
 
 def findcauses(target, cuda, epochs, kernel_size, layers, 
-               log_interval, lr, optimizername, seed, dilation_c, significance, file):
+               log_interval, lr, optimizername, seed, dilation_c, significance, 
+               file, lr_scheduler, early_stopping):
     """Discovers potential causes of one target time series, validates these potential causes with PIVM and discovers the corresponding time delays"""
 
     print("\n", "Analysis started for target: ", target)
@@ -76,15 +88,25 @@ def findcauses(target, cuda, epochs, kernel_size, layers,
   #  scheduler = getattr(scheduler)
    # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min',0.0000000000000000001)
     
-    scores, firstloss = train(1, X_train, Y_train, model, optimizer,log_interval,epochs)
+    scores, firstloss = train(1, X_train, Y_train, model, optimizer,log_interval,
+                              epochs, lr_scheduler, early_stopping)
     firstloss = firstloss.cpu().data.item()
     
     losses = np.empty(0)
 
     for ep in range(2, epochs+1):
-        scores, realloss = train(ep, X_train, Y_train, model, optimizer,log_interval,epochs)
+        scores, realloss = train(ep, X_train, Y_train, model, optimizer,
+                                 log_interval,epochs, lr_scheduler, early_stopping)
         realloss_np = realloss.detach().numpy()                  #Convert PyTorch Tensor to NumPy
         losses = np.append(losses, realloss_np)
+        
+        if lr_scheduler:
+            lr_scheduler(realloss)
+        if early_stopping:
+            early_stopping(realloss)
+            if early_stopping.early_stop:
+                break
+
     realloss = realloss.cpu().data.item()
     
     s = sorted(scores.view(-1).cpu().detach().numpy(), reverse=True)

@@ -9,6 +9,7 @@ import copy
 import matplotlib.pyplot as plt
 import os
 import sys
+from utils import EarlyStopping, LRScheduler
 
 # os.chdir(os.path.dirname(sys.argv[0])) #uncomment this line to run in VSCode
 
@@ -203,7 +204,8 @@ def runTCDF(datafile):
         causes, causeswithdelay, realloss, scores, losses = TCDF.findcauses(c, cuda=cuda, epochs=nrepochs, 
         kernel_size=kernel_size, layers=levels, log_interval=loginterval, 
         lr=learningrate, optimizername=optimizername,
-        seed=seed, dilation_c=dilation_c, significance=significance, file=datafile)
+        seed=seed, dilation_c=dilation_c, significance=significance, file=datafile,
+        lr_scheduler=lr_scheduler, early_stopping=early_stopping)
 
         allscores[idx]=scores
         allcauses[idx]=causes
@@ -303,7 +305,8 @@ parser.add_argument('--kernel_size', type=check_positive, default=4, help='Size 
 parser.add_argument('--hidden_layers', type=check_zero_or_positive, default=0, help='Number of hidden layers in the depthwise convolution (default: 0)') 
 parser.add_argument('--learning_rate', type=float, default=0.01, help='Learning rate (default: 0.01)')
 parser.add_argument('--optimizer', type=str, default='Adam', choices=['Adam', 'RMSprop'], help='Optimizer to use (default: Adam)')
-#parser.add_argument('--scheduler',)
+parser.add_argument('--lr_scheduler', default=True, action="store_true")
+parser.add_argument('--early_stopping', default=True, action="store_true")
 parser.add_argument('--log_interval', type=check_positive, default=500, help='Epoch interval to report loss (default: 500)')
 parser.add_argument('--seed', type=check_positive, default=1111, help='Random seed (default: 1111)')
 parser.add_argument('--dilation_coefficient', type=check_positive, default=4, help='Dilation coefficient, recommended to be equal to kernel size (default: 4)')
@@ -333,6 +336,8 @@ loginterval = args.log_interval
 seed=args.seed
 cuda=args.cuda
 significance=args.significance
+lr_scheduler=args.lr_scheduler
+early_stopping=args.early_stopping
 
 if args.ground_truth is not None:
     datafiles = args.ground_truth
