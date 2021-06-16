@@ -303,6 +303,7 @@ parser.add_argument('--kernel_size', type=check_positive, default=4, help='Size 
 parser.add_argument('--hidden_layers', type=check_zero_or_positive, default=0, help='Number of hidden layers in the depthwise convolution (default: 0)') 
 parser.add_argument('--learning_rate', type=float, default=0.01, help='Learning rate (default: 0.01)')
 parser.add_argument('--optimizer', type=str, default='Adam', choices=['Adam', 'RMSprop'], help='Optimizer to use (default: Adam)')
+#parser.add_argument('--scheduler',)
 parser.add_argument('--log_interval', type=check_positive, default=500, help='Epoch interval to report loss (default: 500)')
 parser.add_argument('--seed', type=check_positive, default=1111, help='Random seed (default: 1111)')
 parser.add_argument('--dilation_coefficient', type=check_positive, default=4, help='Dilation coefficient, recommended to be equal to kernel size (default: 4)')

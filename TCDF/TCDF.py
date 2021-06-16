@@ -29,13 +29,14 @@ def preparedata(file, target):
     return x, y
 
 
-def train(epoch, traindata, traintarget, modelname, optimizer,log_interval,epochs):
+def train(epoch, traindata, traintarget, modelname, optimizer,scheduler,log_interval,epochs):
     """Trains model by performing one epoch and returns attention scores and loss."""
 
     modelname.train()
     x, y = traindata[0:1], traintarget[0:1]
         
     optimizer.zero_grad()
+    scheduler
     epochpercentage = (epoch/float(epochs))*100
     output = modelname(x)
 
@@ -71,7 +72,9 @@ def findcauses(target, cuda, epochs, kernel_size, layers,
         X_train = X_train.cuda()
         Y_train = Y_train.cuda()
 
-    optimizer = getattr(optim, optimizername)(model.parameters(), lr=lr)    
+    optimizer = getattr(optim, optimizername)(model.parameters(), lr=lr) 
+  #  scheduler = getattr(scheduler)
+   # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min',0.0000000000000000001)
     
     scores, firstloss = train(1, X_train, Y_train, model, optimizer,log_interval,epochs)
     firstloss = firstloss.cpu().data.item()
@@ -131,8 +134,8 @@ def findcauses(target, cuda, epochs, kernel_size, layers,
         testloss = F.mse_loss(output, Y_train)
         testloss = testloss.cpu().data.item()
         
-        diff = firstloss-realloss
-        testdiff = firstloss-testloss
+        diff = firstloss-realloss        # Difference between loss in first and last epoch original dataset
+        testdiff = firstloss-testloss    # Difference between loss in first and last epoch randomly shuffled dataset
 
         if testdiff>(diff*significance): 
             validated.remove(idx) 
