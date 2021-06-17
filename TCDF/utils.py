@@ -15,7 +15,7 @@ class LRScheduler():
     by given `factor`.
     """
     def __init__(
-        self, optimizer, patience=5, min_lr=1e-6, factor=0.5
+        self, optimizer, patience=5, min_lr=1e-6, factor=0.1
     ):
         """
         new_lr = old_lr * factor
@@ -70,7 +70,6 @@ class EarlyStopping():
             self.best_loss = val_loss
         elif self.best_loss - val_loss < self.min_delta:
             self.counter += 1
-            print(f"INFO: Early stopping counter {self.counter} of {self.patience}")
             if self.counter >= self.patience:
-                print('INFO: Early stopping')
+                print(f'INFO: Early stopping at epoch {self.counter}')
                 self.early_stop = True

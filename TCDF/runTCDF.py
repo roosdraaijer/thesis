@@ -324,8 +324,8 @@ group.add_argument('--ground_truth',action=StoreDictKeyPair, help='Provide datas
 group.add_argument('--data', nargs='+', help='(Path to) one or more datasets to analyse by TCDF containing multiple time series. Required file format: csv with a column (incl. header) for each time series')
 # Adjusted implementation by Draaijer, R.
 # Extra arguments to implement callback on learning rate and early stopping
-parser.add_argument('--lr_scheduler', dest='lr_scheduler', default=True, action="store_true")
-parser.add_argument('--early_stopping', dest='early_stopping', default=True, action="store_true")
+parser.add_argument('--lr_scheduler', dest='lr_scheduler', default=True, action="store_true", help='Train model with adaptive learning rate (default: True). Optional to tweak parameters in utensils.py (default: patience=5, min_lr=1e-6, factor=0.1).')
+parser.add_argument('--early_stopping', dest='early_stopping', default=True, action="store_true", help='Train model with early stopping (default: True). Optional to tweak parameters in utensils.py (default: patience=150, min_delta=0).')
 
 args = parser.parse_args()
 

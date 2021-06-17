@@ -87,9 +87,6 @@ def findcauses(target, cuda, epochs, kernel_size, layers,
         print('INFO: Initializing early stopping')
         early_stopping = EarlyStopping()
     
-  #  scheduler = getattr(scheduler)
-   # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min',0.0000000000000000001)
-    
     scores, firstloss = train(1, X_train, Y_train, model, optimizer,log_interval,
                               epochs, lr_scheduler, early_stopping)
     firstloss = firstloss.cpu().data.item()
@@ -114,9 +111,6 @@ def findcauses(target, cuda, epochs, kernel_size, layers,
                 break
 
     realloss = realloss.cpu().data.item()
-    
-
-    
     
     s = sorted(scores.view(-1).cpu().detach().numpy(), reverse=True)
     indices = np.argsort(-1 *scores.view(-1).cpu().detach().numpy())
