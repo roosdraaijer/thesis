@@ -85,11 +85,13 @@ def evaluate_prediction(target, cuda, epochs, kernel_size, layers,
         prediction=output.cpu().detach().numpy()[0,:,0]
         T = output.size()[1]
         total_e = 0.
+        allpredictions = np.empty(0)
         for t in range(T):
             real = Y_test[:,t,:]
             predicted = output[:,t,:]
             e = abs(real - predicted)
             total_e+=e
+            allpredictions = np.append(allpredictions, e)
         total_e = total_e.cpu().data.item()
         total = 0.
         for t in range(1,T):
@@ -103,7 +105,7 @@ def evaluate_prediction(target, cuda, epochs, kernel_size, layers,
         else:
             MASE = 0.
         
-        return MASE, prediction
+        return MASE, prediction, allpredictions
         
     realloss = realloss.cpu().data.item()
 
@@ -131,7 +133,7 @@ def evaluate(datafile):
     MASEs = []
     predictions = dict()
     for c in columns:
-        MASE, prediction = evaluate_prediction(c, cuda=cuda, epochs=nrepochs, 
+        MASE, prediction, allpredictions = evaluate_prediction(c, cuda=cuda, epochs=nrepochs, 
         kernel_size=kernel_size, layers=levels, loginterval=loginterval, 
         lr=learningrate, optimizername=optimizername,
         seed=seed, dilation_c=dilation_c, split=split, file=datafile)
@@ -141,7 +143,8 @@ def evaluate(datafile):
     avg = np.mean(MASEs)
     std = np.std(MASEs)
     
-    return allres, avg, std, predictions
+    return allres, avg, std, predictions, allpredictions
+
 parser = argparse.ArgumentParser(description='TCDF: Temporal Causal Discovery Framework')
 
 parser.add_argument('--cuda', action="store_true", default=False, help='Use CUDA (GPU) (default: False)')
@@ -150,7 +153,6 @@ parser.add_argument('--kernel_size', type=check_positive, default=4, help='Size 
 parser.add_argument('--hidden_layers', type=check_zero_or_positive, default=0, help='Number of hidden layers in the depthwise convolution (default: 0)') 
 parser.add_argument('--learning_rate', type=float, default=0.01, help='Learning rate (default: 0.01)')
 parser.add_argument('--optimizer', type=str, default='Adam', choices=['Adam', 'RMSprop'], help='Optimizer to use: Adam or RMSprop (default: Adam)')
-#"parser.add_argument('--scheduler',type=str,default=)
 parser.add_argument('--log_interval', type=check_positive, default=500, help='Epoch interval to report loss (default: 500)')
 parser.add_argument('--seed', type=check_positive, default=1111, help='Random seed (default: 1111)')
 parser.add_argument('--dilation_coefficient', type=check_positive, default=4, help='Dilation coefficient, recommended to be equal to kernel size (default: 4)')
