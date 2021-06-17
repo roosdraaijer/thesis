@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import os
 import sys
 from utils import EarlyStopping, LRScheduler
+from model import ADDSTCN
 
 # os.chdir(os.path.dirname(sys.argv[0])) #uncomment this line to run in VSCode
 
@@ -199,6 +200,11 @@ def runTCDF(datafile):
     alllosses=dict()
 
     columns = list(df_data)
+    
+
+    # Adjusted implementation by Draaijer, R.
+    # Extra argument added for learning rate scheduler, early stopping 
+    # Realloss for every epoch is saved and returned for loss graphs
     for c in columns:
         idx = df_data.columns.get_loc(c)
         causes, causeswithdelay, realloss, scores, losses = TCDF.findcauses(c, cuda=cuda, epochs=nrepochs, 
@@ -238,6 +244,7 @@ def plotgraph(stringdatafile,alldelays,columns):
     pylab.show()
 
 def main(datafiles, evaluation):
+    
     if evaluation:
         totalF1direct = [] #contains F1-scores of all datasets
         totalF1 = [] #contains F1'-scores of all datasets
@@ -253,6 +260,8 @@ def main(datafiles, evaluation):
         
         print("\n Dataset: ", stringdatafile)
 
+        # Adjusted implementation by Draaijer, R.
+        # Global variable to return when running TCDF (for loss graphs)
         global alllosses
         # run TCDF
         allcauses, alldelays, allreallosses, allscores, columns, alllosses = runTCDF(datafile) #results of TCDF containing indices of causes and effects
@@ -305,8 +314,6 @@ parser.add_argument('--kernel_size', type=check_positive, default=4, help='Size 
 parser.add_argument('--hidden_layers', type=check_zero_or_positive, default=0, help='Number of hidden layers in the depthwise convolution (default: 0)') 
 parser.add_argument('--learning_rate', type=float, default=0.01, help='Learning rate (default: 0.01)')
 parser.add_argument('--optimizer', type=str, default='Adam', choices=['Adam', 'RMSprop'], help='Optimizer to use (default: Adam)')
-parser.add_argument('--lr_scheduler', default=True, action="store_true")
-parser.add_argument('--early_stopping', default=True, action="store_true")
 parser.add_argument('--log_interval', type=check_positive, default=500, help='Epoch interval to report loss (default: 500)')
 parser.add_argument('--seed', type=check_positive, default=1111, help='Random seed (default: 1111)')
 parser.add_argument('--dilation_coefficient', type=check_positive, default=4, help='Dilation coefficient, recommended to be equal to kernel size (default: 4)')
@@ -315,6 +322,10 @@ parser.add_argument('--plot', action="store_true", default=False, help='Show cau
 group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument('--ground_truth',action=StoreDictKeyPair, help='Provide dataset(s) and the ground truth(s) to evaluate the results of TCDF. Argument format: DataFile1=GroundtruthFile1,Key2=Value2,... with a key for each dataset containing multivariate time series (required file format: csv, a column with header for each time series) and a value for the corresponding ground truth (required file format: csv, no header, index of cause in first column, index of effect in second column, time delay between cause and effect in third column)')
 group.add_argument('--data', nargs='+', help='(Path to) one or more datasets to analyse by TCDF containing multiple time series. Required file format: csv with a column (incl. header) for each time series')
+# Adjusted implementation by Draaijer, R.
+# Extra arguments to implement callback on learning rate and early stopping
+parser.add_argument('--lr_scheduler', dest='lr_scheduler', default=True, action="store_true")
+parser.add_argument('--early_stopping', dest='early_stopping', default=True, action="store_true")
 
 args = parser.parse_args()
 
@@ -336,6 +347,8 @@ loginterval = args.log_interval
 seed=args.seed
 cuda=args.cuda
 significance=args.significance
+# Adjusted implementation by Draaijer, R.
+# Extra arguments to implement callback on learning rate and early stopping
 lr_scheduler=args.lr_scheduler
 early_stopping=args.early_stopping
 

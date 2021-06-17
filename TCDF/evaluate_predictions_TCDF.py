@@ -77,7 +77,9 @@ def evaluate_prediction(target, cuda, epochs, kernel_size, layers,
     
     for ep in range(1, epochs+1):
         scores, realloss = TCDF.train(ep, X_train, Y_train, model, optimizer,loginterval,epochs)
-        
+    
+    # Adjusted implementation by Draaijer, R.
+    # Update prediction accuracy with every epoch
         model.eval()
         output = model(X_test)
         prediction=output.cpu().detach().numpy()[0,:,0]

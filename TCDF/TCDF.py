@@ -48,15 +48,6 @@ def train(epoch, traindata, traintarget, modelname, optimizer,log_interval,
     loss.backward()
     optimizer.step()
     
-    # either initialize early stopping or learning rate scheduler
-    if lr_scheduler:
-        print('INFO: Initializing learning rate scheduler')
-        lr_scheduler = LRScheduler(optimizer)
-
-    if early_stopping:
-        print('INFO: Initializing early stopping')
-        early_stopping = EarlyStopping()
-
     if epoch % log_interval ==0 or epoch % epochs == 0 or epoch==1:
         print('Epoch: {:2d} [{:.0f}%] \tLoss: {:.6f}'.format(epoch, epochpercentage, loss))
 
@@ -85,6 +76,17 @@ def findcauses(target, cuda, epochs, kernel_size, layers,
         Y_train = Y_train.cuda()
 
     optimizer = getattr(optim, optimizername)(model.parameters(), lr=lr) 
+    
+    # Adjusted implementation by Draaijer, R.
+    # Either initialize early stopping or learning rate scheduler
+    if lr_scheduler:
+        print('INFO: Initializing learning rate scheduler')
+        lr_scheduler = LRScheduler(optimizer)
+    
+    if early_stopping:
+        print('INFO: Initializing early stopping')
+        early_stopping = EarlyStopping()
+    
   #  scheduler = getattr(scheduler)
    # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min',0.0000000000000000001)
     
@@ -97,17 +99,24 @@ def findcauses(target, cuda, epochs, kernel_size, layers,
     for ep in range(2, epochs+1):
         scores, realloss = train(ep, X_train, Y_train, model, optimizer,
                                  log_interval,epochs, lr_scheduler, early_stopping)
-        realloss_np = realloss.detach().numpy()                  #Convert PyTorch Tensor to NumPy
+        # Adjusted implementation by Draaijer, R.
+        # Convert PyTorch Tensor to NumPy
+        realloss_np = realloss.detach().numpy()                  
         losses = np.append(losses, realloss_np)
         
+        # Adjusted implementation by Draaijer, R.
+        # Either initialize early stopping or learning rate scheduler
         if lr_scheduler:
-            lr_scheduler(realloss)
+            lr_scheduler(realloss_np)
         if early_stopping:
-            early_stopping(realloss)
+            early_stopping(realloss_np)
             if early_stopping.early_stop:
                 break
 
     realloss = realloss.cpu().data.item()
+    
+
+    
     
     s = sorted(scores.view(-1).cpu().detach().numpy(), reverse=True)
     indices = np.argsort(-1 *scores.view(-1).cpu().detach().numpy())
@@ -155,9 +164,9 @@ def findcauses(target, cuda, epochs, kernel_size, layers,
         output = model(shuffled)
         testloss = F.mse_loss(output, Y_train)
         testloss = testloss.cpu().data.item()
-        
-        diff = firstloss-realloss        # Difference between loss in first and last epoch original dataset
-        testdiff = firstloss-testloss    # Difference between loss in first and last epoch randomly shuffled dataset
+                                            # Adjusted comments by Draaijer, R.
+        diff = firstloss-realloss           # Difference between loss in first and last epoch original dataset
+        testdiff = firstloss-testloss       # Difference between loss in first and last epoch randomly shuffled dataset
 
         if testdiff>(diff*significance): 
             validated.remove(idx) 
