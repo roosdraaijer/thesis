@@ -95,7 +95,7 @@ def findcauses(target, cuda, epochs, kernel_size, layers,
 
     for ep in range(2, epochs+1):
         scores, realloss = train(ep, X_train, Y_train, model, optimizer,
-                                 log_interval,epochs, lr_scheduler, early_stopping)
+                                 log_interval, epochs, lr_scheduler, early_stopping)
         # Adjusted implementation by Draaijer, R.
         # Convert PyTorch Tensor to NumPy
         realloss_np = realloss.detach().numpy()                  

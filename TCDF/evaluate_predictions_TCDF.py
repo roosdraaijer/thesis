@@ -11,6 +11,7 @@ import copy
 import matplotlib.pyplot as plt
 import os
 import sys
+from utils import EarlyStopping, LRScheduler
 
 # os.chdir(os.path.dirname(sys.argv[0])) #uncomment this line to run in VSCode
 
@@ -45,7 +46,8 @@ def check_between_zero_and_one(value):
     return fvalue
 
 def evaluate_prediction(target, cuda, epochs, kernel_size, layers, 
-               loginterval, lr, optimizername, seed, dilation_c, split, file):
+               log_interval, lr, optimizername, seed, dilation_c, split, file,
+               lr_scheduler, early_stopping):
     """Runs first part of TCDF to predict one time series and evaluate its accuracy (MASE)."""
     print("\n", "Analysis started for target: ", target)
     torch.manual_seed(seed)
@@ -73,11 +75,42 @@ def evaluate_prediction(target, cuda, epochs, kernel_size, layers,
         X_test = X_test.cuda()
         Y_test = Y_test.cuda()
 
-    optimizer = getattr(optim, optimizername)(model.parameters(), lr=lr)   
-    global allpredictions
+    optimizer = getattr(optim, optimizername)(model.parameters(), lr=lr) 
+    
+    # Adjusted implementation by Draaijer, R.
+    # Either initialize early stopping or learning rate scheduler
+    if lr_scheduler:
+        print('INFO: Initializing learning rate scheduler')
+        lr_scheduler = LRScheduler(optimizer)
+    
+    if early_stopping:
+        print('INFO: Initializing early stopping')
+        early_stopping = EarlyStopping()
+        
+    losses = np.empty(0)
+    allpredictions = dict()
     
     for ep in range(1, epochs+1):
-        scores, realloss = TCDF.train(ep, X_train, Y_train, model, optimizer,loginterval,epochs)
+        scores, realloss = TCDF.train(ep, X_train, Y_train, model, optimizer,
+                                 log_interval,epochs, lr_scheduler, early_stopping)
+        
+        # Adjusted implementation by Draaijer, R.
+        # Evaluate model after each epoch
+        
+        # Convert PyTorch Tensor to NumPy
+        realloss_np = realloss.detach().numpy()                  
+        losses = np.append(losses, realloss_np)
+        
+        # Adjusted implementation by Draaijer, R.
+        # Either initialize early stopping or learning rate scheduler
+        if lr_scheduler:
+            lr_scheduler(realloss_np)
+        if early_stopping:
+            early_stopping(realloss_np)
+            if early_stopping.early_stop:
+                break
+        scores, realloss = TCDF.train(ep, X_train, Y_train, model, optimizer,
+                                      log_interval, epochs, lr_scheduler, early_stopping)
         
         # Adjusted implementation by Draaijer, R.
         # Update prediction accuracy with every epoch
@@ -92,7 +125,7 @@ def evaluate_prediction(target, cuda, epochs, kernel_size, layers,
             predicted = output[:,t,:]
             e = abs(real - predicted)
             total_e+=e
-            allpredictions = allpredictions[target].update(e)
+            allpredictions.update({target : e})
 
         total_e = total_e.cpu().data.item()
         total = 0.
@@ -135,9 +168,10 @@ def evaluate(datafile):
     predictions = dict()
     for c in columns:
         MASE, prediction = evaluate_prediction(c, cuda=cuda, epochs=nrepochs, 
-        kernel_size=kernel_size, layers=levels, loginterval=loginterval, 
+        kernel_size=kernel_size, layers=levels, log_interval=log_interval, 
         lr=learningrate, optimizername=optimizername,
-        seed=seed, dilation_c=dilation_c, split=split, file=datafile)
+        seed=seed, dilation_c=dilation_c, split=split, file=datafile,
+        lr_scheduler=lr_scheduler, early_stopping=early_stopping)
         predictions[c]= prediction
         MASEs.append(MASE)
         allres.append(MASE)
@@ -160,6 +194,10 @@ parser.add_argument('--dilation_coefficient', type=check_positive, default=4, he
 parser.add_argument('--plot', action="store_true", default=False, help='Plot predicted time series (default: False)')
 parser.add_argument('--train_test_split', type=check_between_zero_and_one, default=0.8, help="Portion of dataset to use for training (default 0.8)")
 parser.add_argument('--data', nargs='+', required=True, help='(Path to) Dataset(s) to predict by TCDF containing multiple time series. Required file format: csv with a column (incl. header) for each time series')
+# Adjusted implementation by Draaijer, R.
+# Extra arguments to implement callback on learning rate and early stopping
+parser.add_argument('--lr_scheduler', dest='lr_scheduler', default=True, action="store_true", help='Train model with adaptive learning rate (default: True). Optional to tweak parameters in utensils.py (default: patience=5, min_lr=1e-6, factor=0.1).')
+parser.add_argument('--early_stopping', dest='early_stopping', default=True, action="store_true", help='Train model with early stopping (default: True). Optional to tweak parameters in utensils.py (default: patience=150, min_delta=0).')
 
 args = parser.parse_args()
 
@@ -177,12 +215,16 @@ nrepochs = args.epochs
 learningrate = args.learning_rate
 optimizername = args.optimizer
 dilation_c = args.dilation_coefficient
-loginterval = args.log_interval
+log_interval = args.log_interval
 seed=args.seed
 cuda=args.cuda
 split=args.train_test_split
 plot = args.plot
 datasets = args.data
+# Adjusted implementation by Draaijer, R.
+# Extra arguments to implement callback on learning rate and early stopping
+lr_scheduler=args.lr_scheduler
+early_stopping=args.early_stopping
 
 evalresults = dict()
 allres = []
