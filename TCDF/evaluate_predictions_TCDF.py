@@ -107,10 +107,8 @@ def evaluate_prediction(target, cuda, epochs, kernel_size, layers,
         else:
             MASE = 0.
         
-        return MASE, prediction
-        
     realloss = realloss.cpu().data.item()
-
+    return MASE, prediction
 
 def plot_predictions(predictions, file):
     """Plots the predicted values of all time series in the dataset"""
@@ -123,6 +121,7 @@ def plot_predictions(predictions, file):
         plt.legend()
 
     plt.show()
+    return predictions
 
 def evaluate(datafile):
     """Collects the predictions of all time series in a dataset and returns overall results."""

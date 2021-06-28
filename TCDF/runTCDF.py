@@ -198,6 +198,7 @@ def runTCDF(datafile):
     allreallosses=dict()
     allscores=dict()
     alllosses=dict()
+    allpredictions=dict()
 
     columns = list(df_data)
     
@@ -263,6 +264,7 @@ def main(datafiles, evaluation):
         # Adjusted implementation by Draaijer, R.
         # Global variable to return when running TCDF (for loss graphs)
         global alllosses
+        global allpredictions
 
         # run TCDF
         allcauses, alldelays, allreallosses, allscores, columns, alllosses = runTCDF(datafile) #results of TCDF containing indices of causes and effects
