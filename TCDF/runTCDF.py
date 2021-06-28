@@ -248,8 +248,6 @@ def main(datafiles, evaluation):
     if evaluation:
         totalF1direct = [] #contains F1-scores of all datasets
         totalF1 = [] #contains F1'-scores of all datasets
-        global allpredictions
-        allpredictions = dict()
 
         receptivefield=1
         for l in range(0, levels):
@@ -276,7 +274,7 @@ def main(datafiles, evaluation):
         if evaluation:
             # evaluate TCDF by comparing discovered causes with ground truth
             print("\n===================Evaluation for", stringdatafile,"===============================")
-            FP, TP, FPdirect, TPdirect, FN, FPs, FPsdirect, TPs, TPsdirect, FNs, F1, F1direct, allpredictions = evaluate(datafiles[datafile], allcauses, columns)
+            FP, TP, FPdirect, TPdirect, FN, FPs, FPsdirect, TPs, TPsdirect, FNs, F1, F1direct = evaluate(datafiles[datafile], allcauses, columns)
             totalF1.append(F1)
             totalF1direct.append(F1direct)
 

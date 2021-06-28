@@ -73,7 +73,8 @@ def evaluate_prediction(target, cuda, epochs, kernel_size, layers,
         X_test = X_test.cuda()
         Y_test = Y_test.cuda()
 
-    optimizer = getattr(optim, optimizername)(model.parameters(), lr=lr)    
+    optimizer = getattr(optim, optimizername)(model.parameters(), lr=lr)   
+    global allpredictions
     
     for ep in range(1, epochs+1):
         scores, realloss = TCDF.train(ep, X_train, Y_train, model, optimizer,loginterval,epochs)
@@ -85,13 +86,14 @@ def evaluate_prediction(target, cuda, epochs, kernel_size, layers,
         prediction=output.cpu().detach().numpy()[0,:,0]
         T = output.size()[1]
         total_e = 0.
-        allpredictions = np.empty(0)
+        
         for t in range(T):
             real = Y_test[:,t,:]
             predicted = output[:,t,:]
             e = abs(real - predicted)
             total_e+=e
-            allpredictions = np.append(allpredictions, e)
+            allpredictions = allpredictions[target].update(e)
+
         total_e = total_e.cpu().data.item()
         total = 0.
         for t in range(1,T):
@@ -105,7 +107,7 @@ def evaluate_prediction(target, cuda, epochs, kernel_size, layers,
         else:
             MASE = 0.
         
-        return MASE, prediction, allpredictions
+        return MASE, prediction
         
     realloss = realloss.cpu().data.item()
 
@@ -133,7 +135,7 @@ def evaluate(datafile):
     MASEs = []
     predictions = dict()
     for c in columns:
-        MASE, prediction, allpredictions = evaluate_prediction(c, cuda=cuda, epochs=nrepochs, 
+        MASE, prediction = evaluate_prediction(c, cuda=cuda, epochs=nrepochs, 
         kernel_size=kernel_size, layers=levels, loginterval=loginterval, 
         lr=learningrate, optimizername=optimizername,
         seed=seed, dilation_c=dilation_c, split=split, file=datafile)
@@ -143,7 +145,7 @@ def evaluate(datafile):
     avg = np.mean(MASEs)
     std = np.std(MASEs)
     
-    return allres, avg, std, predictions, allpredictions
+    return allres, avg, std, predictions
 
 parser = argparse.ArgumentParser(description='TCDF: Temporal Causal Discovery Framework')
 
