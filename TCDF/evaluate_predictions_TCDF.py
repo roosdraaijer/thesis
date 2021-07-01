@@ -88,7 +88,7 @@ def evaluate_prediction(target, cuda, epochs, kernel_size, layers,
         early_stopping = EarlyStopping()
         
     losses = np.empty(0)
-    allpredictions = dict()
+    MASE = np.empty(0)
     
     for ep in range(1, epochs+1):
         scores, realloss = TCDF.train(ep, X_train, Y_train, model, optimizer,
@@ -109,8 +109,6 @@ def evaluate_prediction(target, cuda, epochs, kernel_size, layers,
             early_stopping(realloss_np)
             if early_stopping.early_stop:
                 break
-        scores, realloss = TCDF.train(ep, X_train, Y_train, model, optimizer,
-                                      log_interval, epochs, lr_scheduler, early_stopping)
         
         # Adjusted implementation by Draaijer, R.
         # Update prediction accuracy with every epoch
@@ -125,7 +123,6 @@ def evaluate_prediction(target, cuda, epochs, kernel_size, layers,
             predicted = output[:,t,:]
             e = abs(real - predicted)
             total_e+=e
-            allpredictions.update({target : e})
 
         total_e = total_e.cpu().data.item()
         total = 0.
@@ -136,9 +133,9 @@ def evaluate_prediction(target, cuda, epochs, kernel_size, layers,
         denom = denom.cpu().data.item()
     
         if denom!=0.:
-            MASE = total_e/float(denom)
+            MASE = np.append(MASE, total_e/float(denom))
         else:
-            MASE = 0.
+            MASE = np.append(MASE, 0.)
         
     realloss = realloss.cpu().data.item()
     return MASE, prediction
@@ -166,6 +163,7 @@ def evaluate(datafile):
 
     MASEs = []
     predictions = dict()
+    accuracy = dict()
     for c in columns:
         MASE, prediction = evaluate_prediction(c, cuda=cuda, epochs=nrepochs, 
         kernel_size=kernel_size, layers=levels, log_interval=log_interval, 
@@ -173,12 +171,14 @@ def evaluate(datafile):
         seed=seed, dilation_c=dilation_c, split=split, file=datafile,
         lr_scheduler=lr_scheduler, early_stopping=early_stopping)
         predictions[c]= prediction
-        MASEs.append(MASE)
-        allres.append(MASE)
+        accuracy[c] = MASE
+        
+        MASEs.append(MASE[-1])
+        allres.append(MASE[-1])
     avg = np.mean(MASEs)
     std = np.std(MASEs)
     
-    return allres, avg, std, predictions
+    return allres, avg, std, predictions, accuracy
 
 parser = argparse.ArgumentParser(description='TCDF: Temporal Causal Discovery Framework')
 
@@ -229,7 +229,7 @@ early_stopping=args.early_stopping
 evalresults = dict()
 allres = []
 for datafile in datasets:
-    allres,avg,std,predictions = evaluate(datafile)
+    allres,avg,std,predictions,accuracy = evaluate(datafile)
     evalresults[datafile]=(avg, std)
     print("\nMean Absolute Scaled Error (MASE) averaged over all time series in", datafile,":",evalresults[datafile][0],"with standard deviation",evalresults[datafile][1])
     if plot:
