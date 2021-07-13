@@ -147,6 +147,7 @@ def plot_predictions(predictions, file):
         plt.plot(p,label=c)
         plt.xlabel('Time')
         plt.ylabel('Predicted value')
+        plt.xlim(0, len(p))
         plt.title('Dataset %s'%file)
         plt.legend()
 
