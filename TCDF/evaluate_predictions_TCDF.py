@@ -193,7 +193,7 @@ parser.add_argument('--log_interval', type=check_positive, default=500, help='Ep
 parser.add_argument('--seed', type=check_positive, default=1111, help='Random seed (default: 1111)')
 parser.add_argument('--dilation_coefficient', type=check_positive, default=4, help='Dilation coefficient, recommended to be equal to kernel size (default: 4)')
 parser.add_argument('--plot', action="store_true", default=False, help='Plot predicted time series (default: False)')
-parser.add_argument('--train_test_split', type=check_between_zero_and_one, default=0.5, help="Portion of dataset to use for training (default 0.8)")
+parser.add_argument('--train_test_split', type=check_between_zero_and_one, default=0.8, help="Portion of dataset to use for training (default 0.8)")
 parser.add_argument('--data', nargs='+', required=True, help='(Path to) Dataset(s) to predict by TCDF containing multiple time series. Required file format: csv with a column (incl. header) for each time series')
 # Adjusted implementation by Draaijer, R.
 # Extra arguments to implement callback on learning rate and early stopping
