@@ -71,5 +71,5 @@ class EarlyStopping():
         elif self.best_loss - val_loss < self.min_delta:
             self.counter += 1
             if self.counter >= self.patience:
-                print(f'INFO: Early stopping at epoch {self.counter}')
+                print('INFO: Early stopping')
                 self.early_stop = True
