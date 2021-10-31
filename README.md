@@ -1,6 +1,6 @@
 # MSc Thesis project Earth Sciences
 
-## Are ecological machine learning tools a relevant asset to population dynamic analysis?
+## Are ecological machine learning tools a relevant asset to ecological data analysis?
 
 #### Summary
 
@@ -8,7 +8,7 @@ This thesis project considers a state-of-the-art machine learning (ML) method fo
 
 The use of machine learning (ML) models aid in understanding observed temporal ecological patterns. Due to the growing ecological datasets at our disposal, more and more opportunities arise to use ML models for analysis. Hence, it seems a promising tool to ecologists for accurate predictions. Nevertheless, it still remains unclear if these predictions are based on relevant ecological interactions (i.e. supported by ecological theory).
 
-We will verify a ML approach and its ability to learn complex ecological relationships through evaluation of its performance in retrieving relationships from ecological datasets. This will be achieved by applying this method to a synthetic temporal ecological dataset with predefined relations, using a deterministic population model. Consequently, it is evaluated if the ML model is able to correctly retrieve the ecological relationships from this dataset. 
+We have tried to verify a ML approach and its ability to learn complex ecological relationships through evaluation of its performance in retrieving relationships from ecological datasets. This was be achieved by applying this method to a synthetic temporal ecological dataset with predefined relations, using a deterministic population model. Consequently, we evaluated if the ML model was able to correctly retrieve the ecological relationships from this dataset. 
 
 #### Keywords
-*Machine learning, ecosystem dynamics, timeseries analysis, deep learning, ecological patterns, modelling*
+*Machine learning, ecosystem dynamics, time series analysis, deep learning, modelling, ecological inference*
